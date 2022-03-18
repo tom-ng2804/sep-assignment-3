@@ -94,7 +94,7 @@ WITH cte(City, ProductID, AveragePrice, QuantitySold, QuantitySoldRank) AS (
 		JOIN [Order Details] od ON o.OrderID = od.OrderID
 	GROUP BY c.City, od.ProductID
 )
-SELECT TOP 5 City, ProductID, AveragePrice, QuantitySold, QuantitySoldRank
+SELECT TOP 5 ProductID, AveragePrice, City, ProductID
 FROM cte
 WHERE QuantitySoldRank = 1
 ORDER BY QuantitySold DESC
