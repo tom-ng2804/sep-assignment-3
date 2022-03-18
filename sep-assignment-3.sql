@@ -87,16 +87,17 @@ FROM Customers
 WHERE CustomerID IN (SELECT CustomerID FROM cte)
 
 -- 8. List 5 most popular products, their average price, and the customer city that ordered most quantity of it.
-WITH cte(CustomerID, City, ProductID, Quantity, AveragePrice, [Rank]) AS (
-	SELECT c.CustomerID, c.City, od.ProductID, od.Quantity, AVG(od.UnitPrice) OVER(PARTITION BY od.ProductID) AS AveragePrice, RANK() OVER(PARTITION BY ProductID ORDER BY Quantity DESC) AS [Rank]
+WITH cte(City, ProductID, AveragePrice, QuantitySold, QuantitySoldRank) AS (
+	SELECT c.City, od.ProductID, AVG(od.UnitPrice) AS AveragePrice, SUM(od.Quantity) AS QuantitySold, RANK() OVER(PARTITION BY c.City, od.ProductID ORDER BY SUM(od.Quantity) DESC) AS QuantitySoldRank
 	FROM Customers c
 		JOIN Orders o ON c.CustomerID = o.CustomerID
 		JOIN [Order Details] od ON o.OrderID = od.OrderID
+	GROUP BY c.City, od.ProductID
 )
-SELECT TOP 5 ProductID, AveragePrice, City
+SELECT TOP 5 City, ProductID, AveragePrice, QuantitySold, QuantitySoldRank
 FROM cte
-WHERE [Rank] = 1
-ORDER BY Quantity DESC
+WHERE QuantitySoldRank = 1
+ORDER BY QuantitySold DESC
 
 -- 9. List all cities that have never ordered something but we have employees there.
 -- a. Use sub-query
